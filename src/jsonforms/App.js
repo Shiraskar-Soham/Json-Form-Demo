@@ -14,7 +14,7 @@ function App() {
   const initialData = {
     "name": "Soham Shiraskar",
     "vegetarian": true,
-    "birthDate": "20021-12-11",
+    //"birthDate": "2021-12-11",
     "personalData": {
       "age": 21
     },
@@ -40,11 +40,11 @@ function App() {
       "nationality": {
         "type": "string",
         "enum": [
-          "DE",
-          "IT",
+          "CH",
           "JP",
           "US",
           "RU",
+          "IN",
           "Other"
         ]
       },
@@ -138,6 +138,8 @@ function App() {
     ]
   };
 
+  const log = (type) => console.log.bind(console, type);
+
   const [data, setData] = useState(initialData);
   return (<div className='Parent'>
     <div className='App'>
@@ -148,6 +150,7 @@ function App() {
         renderers={materialRenderers}
         cells={materialCells}
         onChange={({ data, errors }) => setData(data)}
+        onSubmit={log('submitted')}
       />
     </div></div>
   );

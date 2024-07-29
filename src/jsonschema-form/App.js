@@ -9,12 +9,21 @@ import { useState } from 'react';
 function App() {
   
   const schema = {
-    "title": "A registration form",
+    "title": "Access Request Form",
     "type": "object",
     "required": [
-      "firstName",
-      "lastName"
+      "sendersName",
+      "supplierName",
+      "subject",
+      "supplier lms code url"
     ],
+    "Request Access For": {
+        "type": "string",
+        "enum": [
+          "Me",
+          "Others"
+        ]
+      },
     "properties": {
       "password": {
         "type": "string",
@@ -32,6 +41,17 @@ function App() {
         "type": "string",
         "title": "First name"
       },
+      "Nationality": {
+        "type": "string",
+        "enum": [
+          "CH",
+          "JP",
+          "US",
+          "RU",
+          "IN",
+          "Other"
+        ]
+      },
       "age": {
         "type": "integer",
         "title": "Age"
@@ -43,6 +63,7 @@ function App() {
     "ui:order": [
       "firstName",
       "lastName",
+      "nationality",
       "*",
       "password"
     ],
@@ -54,7 +75,10 @@ function App() {
     },
     "password": {
       "ui:widget": "password"
-    }
+    },
+    // "nationality":{
+    //   "ui:widget": "radio"
+    // }
   };
 
   const initialData = {
