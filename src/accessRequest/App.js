@@ -1,13 +1,19 @@
 
 import './App.css';
-// import Form from '@rjsf/core';
 import Form from '@rjsf/mui';
-// import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import ApiService from './Api';
 
 
 function App() {
+    const [enumValues, setEnumValues] = useState([]);
+
+    useEffect(() => {
+        ApiService.getSystems().then((systems) => {
+            setEnumValues(systems);
+        });
+    }, []);
 
     const schema = {
         "title": "Access Request",
@@ -44,18 +50,7 @@ function App() {
                 "properties": {
                     "System": {
                         "type": "string",
-                        "enum": [
-                            "OASYS",
-                            "OXYZO",
-                            "SalesSystem",
-                            "ORION",
-                            "CERES",
-                            "OAGRIFARM (Loan)",
-                            "OCEAN",
-                            "PRISM",
-                            "OMAT",
-                            "OMAT - Finance"
-                        ],
+                        "enum": enumValues,
                     }
                 },
                 "required": [
@@ -350,22 +345,22 @@ function App() {
 
     };
 
-
     const [data, setData] = useState();
 
     const log = (type) => console.log.bind(console, type);
 
-    return (<div className='Parent'>
-        <Form
-            schema={schema}
-            uiSchema={uiSchema}
-            formData={data}
-            validator={validator}
-            onChange={({ data, errors }) => setData(data)}
-            onSubmit={log('submitted')}
-            onError={log('errors')}
-        />
-    </div>
+    return (
+        <div className='Parent'>
+            <Form
+                schema={schema}
+                uiSchema={uiSchema}
+                formData={data}
+                validator={validator}
+                onChange={({ formData, errors }) => setData(formData)}
+                onSubmit={log('submitted')}
+                onError={log('errors')}
+            />
+        </div>
     );
 }
 
