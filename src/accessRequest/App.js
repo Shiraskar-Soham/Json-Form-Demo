@@ -14,17 +14,11 @@ function App() {
 
 
     useEffect(() => {
-        ApiService.getSystems().then((Systems) => {
-            setSystemKeys(Systems);
+        ApiService.getSystems().then(({ enumNames, displayNames }) => {
+            setSystemKeys(enumNames);
+            setEnumValues(displayNames);
         });
     }, []);
-
-    useEffect(() => {
-        ApiService.getSystemsNames().then((Systems) => {
-            setEnumValues(Systems);
-        });
-    }, []);
-
 
     useEffect(() => {
         if (data && data.conditional && data.conditional.Systems) {
@@ -60,15 +54,15 @@ function App() {
             },
             "conditional": {
                 "title": "Select Respective System and Modules",
-                "$ref": "#/definitions/person"
+                "$ref": "#/definitions/systemValue"
             },
             "conditional1": {
                 "title": "Select Respective System and Modules",
-                "$ref": "#/definitions/person1"
+                "$ref": "#/definitions/moduleValue"
             }
         },
         "definitions": {
-            "person": {
+            "systemValue": {
                 "title": "Select System you want to access.",
                 "type": "object",
                 "properties": {
@@ -82,7 +76,7 @@ function App() {
                     "Systems"
                 ],
             },
-            "person1": {
+            "moduleValue": {
                 "title": "Select Modules you want to access.",
                 "type": "object",
                 "properties": {
