@@ -8,12 +8,32 @@ import ApiService from './Api';
 
 function App() {
     const [enumValues, setEnumValues] = useState([]);
+    const [systemKeys, setSystemKeys] = useState([]);
+    const [moduleValues, setModuleValues] = useState([]);
+    const [data, setData] = useState();
+
 
     useEffect(() => {
-        ApiService.getSystems().then((systems) => {
-            setEnumValues(systems);
+        ApiService.getSystems().then((Systems) => {
+            setSystemKeys(Systems);
         });
     }, []);
+
+    useEffect(() => {
+        ApiService.getSystemsNames().then((Systems) => {
+            setEnumValues(Systems);
+        });
+    }, []);
+
+
+    useEffect(() => {
+        if (data && data.conditional && data.conditional.Systems) {
+            ApiService.getModules(data.conditional.Systems).then((Systems) => {
+                setModuleValues(Systems);
+            });
+        }
+    }, [data]);
+    
 
     const schema = {
         "title": "Access Request",
@@ -41,327 +61,127 @@ function App() {
             "conditional": {
                 "title": "Select Respective System and Modules",
                 "$ref": "#/definitions/person"
+            },
+            "conditional1": {
+                "title": "Select Respective System and Modules",
+                "$ref": "#/definitions/person1"
             }
         },
         "definitions": {
             "person": {
-                "title": "Select modules you want to access.",
+                "title": "Select System you want to access.",
                 "type": "object",
                 "properties": {
-                    "System": {
+                    "Systems": {
                         "type": "string",
-                        "enum": enumValues,
+                        "enumNames": enumValues,
+                        "enum": systemKeys,
                     }
                 },
                 "required": [
-                    "System"
+                    "Systems"
                 ],
-                "dependencies": {
-                    "System": {
-                        "oneOf": [
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "Other"
-                                        ]
-                                    },
-                                    "Enter names of module": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "OASYS"
-                                        ]
-                                    },
-                                    "OASYS Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "RFQ",
-                                                "Order",
-                                                "Dispatch",
-                                                "Shipment",
-                                                "Invoice",
-                                                "Supplier PO Verification",
-                                                "Report",
-                                                "Receipt",
-                                                "Payment Request",
-                                                "Ledger",
-                                                "Voucher",
-                                                "Invoice Verification",
-                                                "Warehouse",
-                                                "Supplier Verification",
-                                                "Accounts - Supplier",
-                                                "Accounts - LSP",
-                                                "Accounts - Vendor",
-                                                "Accounts - Agent",
-                                                "Other"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    }
-                                },
-                                "required": [
-                                    "OASYS Modules"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "OCEAN"
-                                        ]
-                                    },
-                                    "OCEAN Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "RFQ",
-                                                "Order",
-                                                "Dispatch",
-                                                "Shipment",
-                                                "Invoice",
-                                                "Supplier PO Verification",
-                                                "Report",
-                                                "Receipt",
-                                                "Payment Request",
-                                                "Ledger",
-                                                "Voucher",
-                                                "Invoice Verification",
-                                                "Warehouse",
-                                                "Supplier Verification",
-                                                "Accounts - Supplier",
-                                                "Accounts - LSP",
-                                                "Accounts - Vendor",
-                                                "Accounts - Agent",
-                                                "Other"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    }
-                                },
-                                "required": [
-                                    "OCEAN Modules"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "CERES"
-                                        ]
-                                    },
-                                    "CERES Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "RFQ",
-                                                "Order",
-                                                "Dispatch",
-                                                "Shipment",
-                                                "Invoice",
-                                                "Supplier PO Verification",
-                                                "Report",
-                                                "Receipt",
-                                                "Payment Request",
-                                                "Ledger",
-                                                "Voucher",
-                                                "Invoice Verification",
-                                                "Warehouse",
-                                                "Supplier Verification",
-                                                "Accounts - Supplier",
-                                                "Accounts - LSP",
-                                                "Accounts - Vendor",
-                                                "Accounts - Agent",
-                                                "Other"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    }
-                                },
-                                "required": [
-                                    "CERES Modules"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "OMAT"
-                                        ]
-                                    },
-                                    "OMAT Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "RFQ",
-                                                "Order",
-                                                "Dispatch",
-                                                "Shipment",
-                                                "Invoice",
-                                                "Supplier PO Verification",
-                                                "Report",
-                                                "Receipt",
-                                                "Payment Request",
-                                                "Ledger",
-                                                "Voucher",
-                                                "Invoice Verification",
-                                                "Warehouse",
-                                                "Supplier Verification",
-                                                "Accounts - Supplier",
-                                                "Accounts - LSP",
-                                                "Accounts - Vendor",
-                                                "Accounts - Agent",
-                                                "Other"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    }
-                                },
-                                "required": [
-                                    "OMAT Modules"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "ORION"
-                                        ]
-                                    },
-                                    "ORION Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "Module1",
-                                                "Module2",
-                                                "Module3",
-                                                "Module4",
-                                                "Other"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    }
-                                },
-                                "required": [
-                                    "ORION Modules"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "System": {
-                                        "enum": [
-                                            "SalesSystem"
-                                        ]
-                                    },
-                                    "SalesSystem Modules": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "Lead",
-                                                "Collection",
-                                                "Disbursal Status",
-                                                "Interest Collection",
-                                                "Check In/ Check Out"
-                                            ]
-                                        },
-                                        "uniqueItems": true
-                                    },
-                                    "other": { "type": "string" }
+            },
+            "person1": {
+                "title": "Select Modules you want to access.",
+                "type": "object",
+                "properties": {
+                    "Modules": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
 
-                                },
-                                "required": [
-                                    "SalesSystem Modules"
-                                ]
-                            }
-                        ]
-                    }
+                            "enum": moduleValues
+                        },
+                        "uniqueItems": true
                 }
-            }
+            },
+            "required": [
+                "Modules"
+            ],
         }
-    };
+    }
+};
 
-    const uiSchema = {
-        "Access Request For": {
+const uiSchema = {
+    "Access Request For": {
+        "ui:widget": "radio",
+        "ui:options": {
+            "inline": true
+        }
+    },
+    "conditional": {
+        "Systems": {
             "ui:widget": "radio",
             "ui:options": {
                 "inline": true
             }
         },
-        "conditional": {
-            "System": {
-                "ui:widget": "radio",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "OASYS Modules": {
+        "OASYS Modules": {
 
-            },
-            "CERES Modules": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "OCEAN Modules": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "OMAT Modules": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "ORION Modules": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "SalesSystem Modules": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                }
-            },
         },
-        "RMS Details": {
-            "ui:readonly": true
-          },
+        "CERES Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+                "inline": true
+            }
+        },
+        "OCEAN Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+                "inline": true
+            }
+        },
+        "OMAT Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+                "inline": true
+            }
+        },
+        "ORION Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+                "inline": true
+            }
+        },
+        "SalesSystem Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+            }
+        },
+    },
+    "conditional1": {
+        "Modules": {
+            "ui:widget": "checkboxes",
+            "ui:options": {
+                "inline": true
+            }
+        }
+    },
+    "RMS Details": {
+        "ui:readonly": true
+    },
 
-    };
+};
 
-    const [data, setData] = useState();
 
-    const log = (type) => console.log.bind(console, type);
+const log = (type) => console.log.bind(console, type);
 
-    return (
-        <div className='Parent'>
-            <Form
-                schema={schema}
-                uiSchema={uiSchema}
-                formData={data}
-                validator={validator}
-                onChange={({ formData, errors }) => setData(formData)}
-                onSubmit={log('submitted')}
-                onError={log('errors')}
-            />
-        </div>
-    );
+console.log(data);
+
+return (
+    <div className='Parent'>
+        <Form
+            schema={schema}
+            uiSchema={uiSchema}
+            formData={data}
+            validator={validator}
+            onChange={({ formData, errors }) => setData(formData)}
+            onSubmit={log('submitted')}
+            onError={log('errors')}
+        />
+    </div>
+);
 }
 
 export default App;
