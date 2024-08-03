@@ -82,19 +82,19 @@ function App() {
                 ]
             },
             "rmsDetails": {
-                "title" : "RMS Details",
+                "title": "RMS Details",
                 "type": "object",
                 "properties": {
                     "department": {
-                        "title" : "Department",
+                        "title": "Department",
                         "type": "string"
                     },
                     "subDepartment": {
-                        "title" : "Sub-Department",
+                        "title": "Sub-Department",
                         "type": "string"
                     },
                     "reportingManager": {
-                        "title" : "Reporting Manager",
+                        "title": "Reporting Manager",
                         "type": "string",
                         "format": "email"
                     },
@@ -166,9 +166,9 @@ function App() {
                 }
             },
             "moduleValue": {
-                    "ui:widget": "checkboxes",
-                    "ui:options": {
-                        "inline": true
+                "ui:widget": "checkboxes",
+                "ui:options": {
+                    "inline": true
                 }
             },
             "rmsDetails": {
@@ -178,10 +178,11 @@ function App() {
 
     };
 
+    const onSubmit = () => {
+        ApiService.submitForm(data)
+    };
 
     const log = (type) => console.log.bind(console, type);
-
-    console.log(data);
 
     return (
         <div className='Parent' >
@@ -191,7 +192,7 @@ function App() {
                 formData={data}
                 validator={validator}
                 onChange={({ formData, errors }) => setData(formData)}
-                onSubmit={log('submitted')}
+                onSubmit={onSubmit}
                 onError={log('errors')}
             />
         </div >

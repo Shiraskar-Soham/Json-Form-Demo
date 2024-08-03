@@ -32,26 +32,57 @@ const ApiService = {
                 return [];
             });
     },
-    getRMS(emailID){
-        const url = new URL (`http://localhost:8081/api/v1/json/getRMS`);
+    getRMS(emailID) {
+        const url = new URL(`http://localhost:8081/api/v1/json/getRMS`);
         url.search = new URLSearchParams({ emailID }).toString();
 
         return fetch(url, { method: 'GET' })
-        .then((res) => res.json())
-        .then((data) => {
-            const rmsDetails = {
-                department: data['department'],
-                subDepartment: data['subDepartment'],
-                reportingManager: data['reportingManager']
-            };
-            return rmsDetails;
-        })
-        .catch((error) => {
-            console.error('Error fetching RMS:', error);
-            return { rmsDetails: []};
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                const rmsDetails = {
+                    department: data['department'],
+                    subDepartment: data['subDepartment'],
+                    reportingManager: data['reportingManager']
+                };
+                return rmsDetails;
+            })
+            .catch((error) => {
+                console.error('Error fetching RMS:', error);
+                return { rmsDetails: [] };
+            });
 
+    },
+    submitForm(data) {
+        const formattedData = {
+            emailId: data.emailId,
+            department: data.rmsDetails.department,
+            subDepartment: data.rmsDetails.subDepartment,
+            approvingManager: data.rmsDetails.reportingManager,
+            systemName: data.systemName.Systems,
+            modules: data.modules.Modules
+        };
+
+        const url = new URL(`http://localhost:8081/api/v1/request/submit`);
+
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formattedData)
+        })
+            .then((res) => res.json())
+            .then((responseData) => {
+                console.log('Form submitted successfully:', responseData);
+                return responseData;
+            })
+            .catch((error) => {
+                console.error('Error submitting form:', error);
+                return { success: false, message: 'Error submitting form' };
+            });
     }
+
+
 };
 
 export default ApiService;
