@@ -1,6 +1,6 @@
 const ApiService = {
     getSystems() {
-        const url = `http://localhost:8082/api/v1/json/systems`;
+        const url = `http://localhost:8081/api/v1/json/systems`;
         return fetch(url, { method: 'GET' })
             .then((res) => res.json())
             .then((data) => {
@@ -13,9 +13,9 @@ const ApiService = {
                 return { enumNames: [], displayNames: [] };
             });
     },
-    getModules(system) {
-        const url = new URL(`http://localhost:8082/api/v1/json/modules`);
-        url.search = new URLSearchParams({ system }).toString();
+    getModules(system_name) {
+        const url = new URL(`http://localhost:8081/api/v1/json/modules`);
+        url.search = new URLSearchParams({ system_name }).toString();
 
         return fetch(url, { method: 'GET' })
             .then((res) => {
@@ -31,6 +31,26 @@ const ApiService = {
                 console.error('Error fetching modules:', error);
                 return [];
             });
+    },
+    getRMS(emailID){
+        const url = new URL (`http://localhost:8081/api/v1/json/getRMS`);
+        url.search = new URLSearchParams({ emailID }).toString();
+
+        return fetch(url, { method: 'GET' })
+        .then((res) => res.json())
+        .then((data) => {
+            const rmsDetails = {
+                department: data['department'],
+                subDepartment: data['subDepartment'],
+                reportingManager: data['reportingManager']
+            };
+            return rmsDetails;
+        })
+        .catch((error) => {
+            console.error('Error fetching RMS:', error);
+            return { rmsDetails: []};
+        });
+
     }
 };
 

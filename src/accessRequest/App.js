@@ -11,6 +11,8 @@ function App() {
     const [systemKeys, setSystemKeys] = useState([]);
     const [moduleValues, setModuleValues] = useState([]);
     const [data, setData] = useState();
+    const [rmsDetails, setRMSDetails] = useState({});
+    const [typingTimeout, setTypingTimeout] = useState(null);
 
 
     useEffect(() => {
@@ -21,43 +23,89 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (data && data.conditional && data.conditional.Systems) {
-            ApiService.getModules(data.conditional.Systems).then((Systems) => {
+        if (data && data.systemName && data.systemName.Systems) {
+            ApiService.getModules(data.systemName.Systems).then((Systems) => {
                 setModuleValues(Systems);
             });
         }
-    }, [data]);
-    
+    }, [data?.systemName?.Systems]);
+
+    useEffect(() => {
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+
+        if (data && data.emailId) {
+            const timeout = setTimeout(() => {
+                // Check if the email format is valid
+                const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
+                if (emailPattern.test(data.emailId)) {
+                    ApiService.getRMS(data.emailId, null).then((result) => {
+                        setRMSDetails(result);
+                    });
+                }
+            }, 500); // Delay in milliseconds
+
+            setTypingTimeout(timeout);
+        }
+
+        return () => {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+        };
+    }, [data?.emailId]);
+
+    useEffect(() => {
+        setData((prevData) => ({
+            ...prevData,
+            rmsDetails: rmsDetails
+        }));
+    }, [rmsDetails]);
+
 
     const schema = {
         "title": "Access Request",
         "type": "object",
         "properties": {
-            "Email Id": {
+            "emailId": {
+                "title": "Email Id",
                 "type": "string",
                 "format": "email"
             },
-            "RMS Details": {
+            "approvingManager": {
+                "type": "string",
+                "title": "Take Approval From",
+                "enum": [
+                    "L1 Manager",
+                    "L2 Manager"
+                ]
+            },
+            "rmsDetails": {
+                "title" : "RMS Details",
                 "type": "object",
                 "properties": {
-                    "Department": {
+                    "department": {
+                        "title" : "Department",
                         "type": "string"
                     },
-                    "Sub-Department": {
+                    "subDepartment": {
+                        "title" : "Sub-Department",
                         "type": "string"
                     },
-                    "Reporting Manager Email Id": {
+                    "reportingManager": {
+                        "title" : "Reporting Manager",
                         "type": "string",
                         "format": "email"
                     },
                 }
             },
-            "conditional": {
-                "title": "Select Respective System and Modules",
+            "systemName": {
+                "title": "Select Respective System",
                 "$ref": "#/definitions/systemValue"
             },
-            "conditional1": {
-                "title": "Select Respective System and Modules",
+            "modules": {
+                "title": "Select Respective Modules",
                 "$ref": "#/definitions/moduleValue"
             }
         },
@@ -84,98 +132,70 @@ function App() {
                         "type": "array",
                         "items": {
                             "type": "string",
-
                             "enum": moduleValues
                         },
                         "uniqueItems": true
-                }
-            },
-            "required": [
-                "Modules"
-            ],
+                    }
+                },
+                "required": [
+                    "Modules"
+                ],
+            }
         }
-    }
-};
+    };
 
-const uiSchema = {
-    "Access Request For": {
-        "ui:widget": "radio",
-        "ui:options": {
-            "inline": true
-        }
-    },
-    "conditional": {
-        "Systems": {
+    const uiSchema = {
+        "approvingManager": {
+            "ui:widget": "radio",
+            "ui:options": {
+                "inline": true
+
+            }
+        },
+        "Take Approval From": {
             "ui:widget": "radio",
             "ui:options": {
                 "inline": true
             }
         },
-        "OASYS Modules": {
-
-        },
-        "CERES Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-                "inline": true
+        "systemName": {
+            "Systems": {
+                "ui:widget": "radio",
+                "ui:options": {
+                    "inline": true
+                }
+            },
+            "moduleValue": {
+                    "ui:widget": "checkboxes",
+                    "ui:options": {
+                        "inline": true
+                }
+            },
+            "rmsDetails": {
+                "ui:readonly": true
             }
         },
-        "OCEAN Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-                "inline": true
-            }
-        },
-        "OMAT Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-                "inline": true
-            }
-        },
-        "ORION Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-                "inline": true
-            }
-        },
-        "SalesSystem Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-            }
-        },
-    },
-    "conditional1": {
-        "Modules": {
-            "ui:widget": "checkboxes",
-            "ui:options": {
-                "inline": true
-            }
-        }
-    },
-    "RMS Details": {
-        "ui:readonly": true
-    },
 
-};
+    };
 
 
-const log = (type) => console.log.bind(console, type);
+    const log = (type) => console.log.bind(console, type);
 
-console.log(data);
+    console.log(data);
 
-return (
-    <div className='Parent'>
-        <Form
-            schema={schema}
-            uiSchema={uiSchema}
-            formData={data}
-            validator={validator}
-            onChange={({ formData, errors }) => setData(formData)}
-            onSubmit={log('submitted')}
-            onError={log('errors')}
-        />
-    </div>
-);
+    return (
+        <div className='Parent' >
+            <Form
+                schema={schema}
+                uiSchema={uiSchema}
+                formData={data}
+                validator={validator}
+                onChange={({ formData, errors }) => setData(formData)}
+                onSubmit={log('submitted')}
+                onError={log('errors')}
+            />
+        </div >
+    );
 }
 
 export default App;
