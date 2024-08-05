@@ -12,8 +12,7 @@ function App() {
     const [moduleValues, setModuleValues] = useState([]);
     const [data, setData] = useState();
     const [rmsDetails, setRMSDetails] = useState({});
-    const [responseData, setResponseData]= useState({});
-    // const [typingTimeout, setTypingTimeout] = useState(null);
+    const [showOtherInput, setShowOtherInput] = useState(false);
 
 
     useEffect(() => {
@@ -35,32 +34,6 @@ function App() {
         }
     }, [data?.systemName?.Systems]);
 
-    // useEffect(() => {
-    //     // if (typingTimeout) {
-    //     //     clearTimeout(typingTimeout);
-    //     // }
-
-    //     if (data && data.emailId) {
-    //         // const timeout = setTimeout(() => {
-    //             // Check if the email format is valid
-    //             const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
-    //             if (emailPattern.test(data.emailId)) {
-    //                 ApiService.getRMS(data.emailId, null).then((result) => {
-    //                     setRMSDetails(result);
-    //                 });
-    //             }
-    //         // }, 500); // Delay in milliseconds
-
-    //         // setTypingTimeout(timeout);
-    //     // }
-
-    //     // return () => {
-    //     //     if (typingTimeout) {
-    //     //         clearTimeout(typingTimeout);
-    //     //     }
-    //     };
-    // }, [data?.emailId]);
-
     useEffect(() => {
         if (data && data.emailId && data.approvingManager) {
             const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
@@ -71,6 +44,14 @@ function App() {
             }
         }
     }, [data?.emailId, data?.approvingManager]);
+
+    useEffect(() => {
+        if (data && data.modules && data.modules.Modules && data.modules.Modules.includes("Other")) {
+            setShowOtherInput(true);
+        } else {
+            setShowOtherInput(false);
+        }
+    }, [data?.modules?.Modules]);
 
     useEffect(() => {
         setData((prevData) => ({
@@ -87,7 +68,7 @@ function App() {
             "emailId": {
                 "title": "Email Id",
                 "type": "string",
-                "format": "email"
+                "format": "email",
             },
             "approvingManager": {
                 "type": "string",
@@ -95,7 +76,7 @@ function App() {
                 "enum": [
                     "L1 Manager",
                     "L2 Manager"
-                ]
+                ],
             },
             "rmsDetails": {
                 "title": "RMS Details",
@@ -110,7 +91,7 @@ function App() {
                         "type": "string"
                     },
                     "reportingManager": {
-                        "title": "Reporting Manager",
+                        "title": "Approving Manager",
                         "type": "string",
                         "format": "email"
                     },
@@ -123,8 +104,14 @@ function App() {
             "modules": {
                 "title": "Select Respective Modules",
                 "$ref": "#/definitions/moduleValue"
+            },
+            "otherInput": {
+                "type": "string",
+                "title": "Please specify other modules"
             }
+
         },
+        "required" : ["approvingManager", "emailId"],
         "definitions": {
             "systemValue": {
                 "title": "Select System you want to access.",
@@ -155,22 +142,28 @@ function App() {
                 },
                 "required": [
                     "Modules"
-                ],
-            }
+                ]
+            },
         }
     };
 
     const uiSchema = {
+        "emailId": {
+            "ui:options": {
+                "conditional": {
+                    "when": "approvingManager",
+                    "equals": "L1 Manager"
+                }
+            }
+        },
         "approvingManager": {
-            "ui:widget": "radio",
             "ui:options": {
                 "inline": true
-
             }
         },
         "rmsDetails": {
-                "ui:readonly": true
-            },
+            "ui:readonly": true
+        },
         "Take Approval From": {
             "ui:widget": "radio",
             "ui:options": {
@@ -178,21 +171,24 @@ function App() {
             }
         },
         "systemName": {
-            "Systems": {
-                "ui:widget": "radio",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            "moduleValue": {
-                "ui:widget": "checkboxes",
-                "ui:options": {
-                    "inline": true
-                }
-            },
-            
+            // "Systems": {
+            //     "ui:widget": "radio",
+            //     "ui:options": {
+            //         "inline": true
+            //     }
+            // }
         },
-
+        "modules": {
+            // "Modules": {
+            //     "ui:widget": "checkboxes",
+            //     "ui:options": {
+            //         "inline": true
+            //     }
+            // },
+        },
+        "otherInput": {
+            "ui:widget": showOtherInput ? "text" : "hidden"
+        }
     };
 
     const onSubmit = ({ formData }) => {
@@ -201,7 +197,7 @@ function App() {
                 // Show success alert
                 const entryID = responseData;
                 alert(`Form Submitted Successfully! Your request Id is  "${entryID}".`);
-              
+
                 setData({}); // Clears form data
             })
             .catch((error) => {

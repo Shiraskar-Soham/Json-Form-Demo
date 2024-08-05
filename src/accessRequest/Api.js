@@ -59,7 +59,8 @@ const ApiService = {
             subDepartment: data.rmsDetails.subDepartment,
             approvingManager: data.rmsDetails.reportingManager,
             systemName: data.systemName.Systems,
-            modules: data.modules.Modules
+            modules: data.modules.Modules,
+            otherInput: data.otherInput
         };
 
         const url = new URL(`http://localhost:8081/api/v1/request/submit`);
@@ -73,7 +74,6 @@ const ApiService = {
         })
             .then((res) => res.json())
             .then((responseData) => {
-                console.log('Form submitted successfully:', responseData);
                 return responseData;
             })
             .catch((error) => {
