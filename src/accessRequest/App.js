@@ -12,7 +12,8 @@ function App() {
     const [moduleValues, setModuleValues] = useState([]);
     const [data, setData] = useState();
     const [rmsDetails, setRMSDetails] = useState({});
-    const [typingTimeout, setTypingTimeout] = useState(null);
+    const [responseData, setResponseData]= useState({});
+    // const [typingTimeout, setTypingTimeout] = useState(null);
 
 
     useEffect(() => {
@@ -23,6 +24,10 @@ function App() {
     }, []);
 
     useEffect(() => {
+        setData((prevData) => ({
+            ...prevData,
+            modules: []
+        }));
         if (data && data.systemName && data.systemName.Systems) {
             ApiService.getModules(data.systemName.Systems).then((Systems) => {
                 setModuleValues(Systems);
@@ -30,31 +35,42 @@ function App() {
         }
     }, [data?.systemName?.Systems]);
 
+    // useEffect(() => {
+    //     // if (typingTimeout) {
+    //     //     clearTimeout(typingTimeout);
+    //     // }
+
+    //     if (data && data.emailId) {
+    //         // const timeout = setTimeout(() => {
+    //             // Check if the email format is valid
+    //             const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
+    //             if (emailPattern.test(data.emailId)) {
+    //                 ApiService.getRMS(data.emailId, null).then((result) => {
+    //                     setRMSDetails(result);
+    //                 });
+    //             }
+    //         // }, 500); // Delay in milliseconds
+
+    //         // setTypingTimeout(timeout);
+    //     // }
+
+    //     // return () => {
+    //     //     if (typingTimeout) {
+    //     //         clearTimeout(typingTimeout);
+    //     //     }
+    //     };
+    // }, [data?.emailId]);
+
     useEffect(() => {
-        if (typingTimeout) {
-            clearTimeout(typingTimeout);
-        }
-
-        if (data && data.emailId) {
-            const timeout = setTimeout(() => {
-                // Check if the email format is valid
-                const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
-                if (emailPattern.test(data.emailId)) {
-                    ApiService.getRMS(data.emailId, null).then((result) => {
-                        setRMSDetails(result);
-                    });
-                }
-            }, 500); // Delay in milliseconds
-
-            setTypingTimeout(timeout);
-        }
-
-        return () => {
-            if (typingTimeout) {
-                clearTimeout(typingTimeout);
+        if (data && data.emailId && data.approvingManager) {
+            const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
+            if (emailPattern.test(data.emailId)) {
+                ApiService.getRMS(data.emailId, data.approvingManager).then((result) => {
+                    setRMSDetails(result);
+                });
             }
-        };
-    }, [data?.emailId]);
+        }
+    }, [data?.emailId, data?.approvingManager]);
 
     useEffect(() => {
         setData((prevData) => ({
@@ -152,6 +168,9 @@ function App() {
 
             }
         },
+        "rmsDetails": {
+                "ui:readonly": true
+            },
         "Take Approval From": {
             "ui:widget": "radio",
             "ui:options": {
@@ -171,15 +190,25 @@ function App() {
                     "inline": true
                 }
             },
-            "rmsDetails": {
-                "ui:readonly": true
-            }
+            
         },
 
     };
 
-    const onSubmit = () => {
-        ApiService.submitForm(data)
+    const onSubmit = ({ formData }) => {
+        ApiService.submitForm(formData)
+            .then((responseData) => {
+                // Show success alert
+                const entryID = responseData;
+                alert(`Form Submitted Successfully! Your request Id is  "${entryID}".`);
+              
+                setData({}); // Clears form data
+            })
+            .catch((error) => {
+                console.error('Form submission failed:', error);
+                // Show error alert
+                alert('Form submission failed!');
+            });
     };
 
     const log = (type) => console.log.bind(console, type);

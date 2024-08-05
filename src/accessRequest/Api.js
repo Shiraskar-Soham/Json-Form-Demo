@@ -32,9 +32,9 @@ const ApiService = {
                 return [];
             });
     },
-    getRMS(emailID) {
+    getRMS(emailID, approvingManager) {
         const url = new URL(`http://localhost:8081/api/v1/json/getRMS`);
-        url.search = new URLSearchParams({ emailID }).toString();
+        url.search = new URLSearchParams({ emailID, approvingManager}).toString();
 
         return fetch(url, { method: 'GET' })
             .then((res) => res.json())
