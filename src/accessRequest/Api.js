@@ -1,21 +1,42 @@
 const ApiService = {
-    getSystems() {
-        const url = `http://localhost:8081/api/v1/json/systems`;
+    getCompany() {
+        const url = `http://localhost:8081/api/v1/json/company`;
         return fetch(url, { method: 'GET' })
             .then((res) => res.json())
             .then((data) => {
-                const enumNames = Object.keys(data);
-                const displayNames = Object.values(data);
-                return { enumNames, displayNames };
+                const companyNames = Object.keys(data);
+                const companyDisplayNames = Object.values(data);
+                return { companyNames, companyDisplayNames };
             })
             .catch((error) => {
                 console.error('Error fetching systems:', error);
                 return { enumNames: [], displayNames: [] };
             });
     },
-    getModules(system_name) {
+    getModules(company_name, system_name) {
         const url = new URL(`http://localhost:8081/api/v1/json/modules`);
-        url.search = new URLSearchParams({ system_name }).toString();
+        url.search = new URLSearchParams({ company_name, system_name }).toString();
+
+        return fetch(url, { method: 'GET' })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                const enumNames = Object.keys(data);
+                const displayNames = Object.values(data);
+                return { enumNames, displayNames };
+            })
+            .catch((error) => {
+                console.error('Error fetching modules:', error);
+                return [];
+            });
+    },
+    getSystems(company_name) {
+        const url = new URL(`http://localhost:8081/api/v1/json/systems`);
+        url.search = new URLSearchParams({ company_name }).toString();
 
         return fetch(url, { method: 'GET' })
             .then((res) => {

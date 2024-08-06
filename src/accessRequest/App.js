@@ -9,11 +9,20 @@ import ApiService from './Api';
 function App() {
     const [enumValues, setEnumValues] = useState([]);
     const [systemKeys, setSystemKeys] = useState([]);
+    const [companyNames, setCompanyNames] = useState([]);
+    const [companyDisplayNames, setCompanyDisplayNames] = useState([]);
     const [moduleValues, setModuleValues] = useState([]);
     const [data, setData] = useState();
     const [rmsDetails, setRMSDetails] = useState({});
     const [showOtherInput, setShowOtherInput] = useState(false);
 
+
+    useEffect(() => {
+        ApiService.getCompany().then(({ companyNames, companyDisplayNames }) => {
+            setCompanyNames(companyNames);
+            setCompanyDisplayNames(companyDisplayNames);
+        });
+    }, []);
 
     useEffect(() => {
         ApiService.getSystems().then(({ enumNames, displayNames }) => {
@@ -34,16 +43,16 @@ function App() {
         }
     }, [data?.systemName?.Systems]);
 
-    useEffect(() => {
-        if (data && data.emailId && data.approvingManager) {
-            const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
-            if (emailPattern.test(data.emailId)) {
-                ApiService.getRMS(data.emailId, data.approvingManager).then((result) => {
-                    setRMSDetails(result);
-                });
-            }
-        }
-    }, [data?.emailId, data?.approvingManager]);
+    // useEffect(() => {
+    //     if (data && data.emailId && data.approvingManager) {
+    //         const emailPattern = /^[^\s@]+@ofbusiness\.in$/;
+    //         if (emailPattern.test(data.emailId)) {
+    //             ApiService.getRMS(data.emailId, data.approvingManager).then((result) => {
+    //                 setRMSDetails(result);
+    //             });
+    //         }
+    //     }
+    // }, [data?.emailId, data?.approvingManager]);
 
     useEffect(() => {
         if (data && data.modules && data.modules.Modules && data.modules.Modules.includes("Other")) {
@@ -78,24 +87,41 @@ function App() {
                     "L2 Manager"
                 ],
             },
-            "rmsDetails": {
-                "title": "RMS Details",
-                "type": "object",
-                "properties": {
-                    "department": {
-                        "title": "Department",
-                        "type": "string"
-                    },
-                    "subDepartment": {
-                        "title": "Sub-Department",
-                        "type": "string"
-                    },
-                    "reportingManager": {
-                        "title": "Approving Manager",
-                        "type": "string",
-                        "format": "email"
-                    },
-                }
+            // "rmsDetails": {
+            //     "title": "RMS Details",
+            //     "type": "object",
+            //     "properties": {
+            //         "department": {
+            //             "title": "Department",
+            //             "type": "string"
+            //         },
+            //         "subDepartment": {
+            //             "title": "Sub-Department",
+            //             "type": "string"
+            //         },
+            //         "reportingManager": {
+            //             "title": "Approving Manager",
+            //             "type": "string",
+            //             "format": "email"
+            //         },
+            //     }
+            // },
+            // "companyName" : {
+            //     "title" : "Company",
+            //     "type" : "array",
+            //     "items" : {
+            //         "type" : "string",
+            //         "enum" : [
+            //             "Ofb",
+            //             "OFS",
+            //             "Oagri"
+            //         ]
+            //     }
+
+            // },
+            "companyName" : {
+                "title": "Select Respective Company",
+                "$ref" : "#/definitions/companyName"
             },
             "systemName": {
                 "title": "Select Respective System",
@@ -111,8 +137,23 @@ function App() {
             }
 
         },
-        "required" : ["approvingManager", "emailId"],
+        // "required" : ["approvingManager", "emailId"],
         "definitions": {
+            "companyName": {
+                "title": "Select your company you want access to",
+                "type": "object",
+                "properties": {
+                    "Company": {
+                        "type": "string",
+                        "enumNames" : companyDisplayNames,
+                        "enum" : companyNames
+                        // "enum": ["s1", "s2"]
+                    }
+                },
+                "required": [
+                    "Company"
+                ],
+            },
             "systemValue": {
                 "title": "Select System you want to access.",
                 "type": "object",
@@ -149,12 +190,7 @@ function App() {
 
     const uiSchema = {
         "emailId": {
-            "ui:options": {
-                "conditional": {
-                    "when": "approvingManager",
-                    "equals": "L1 Manager"
-                }
-            }
+            
         },
         "approvingManager": {
             "ui:options": {
@@ -188,7 +224,7 @@ function App() {
         },
         "otherInput": {
             "ui:widget": showOtherInput ? "text" : "hidden"
-        }
+        },
     };
 
     const onSubmit = ({ formData }) => {
